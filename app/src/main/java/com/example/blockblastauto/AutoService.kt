@@ -4,6 +4,8 @@ import android.accessibilityservice.AccessibilityService
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
@@ -43,7 +45,7 @@ class AutoService : AccessibilityService() {
     val frame=bitmap?.let {Vision.detect(it)}
     val solution=frame?.let {Solver.solve(it.board,it.pieces)}
     bitmap?.recycle()
-    runOnUiThread {
+    Handler(Looper.getMainLooper()).post {
      if(!closed) status?.text=when {
       frame==null->"Riconoscimento incerto: nessun tocco"
       solution==null->"Nessuna sequenza valida"
@@ -51,7 +53,7 @@ class AutoService : AccessibilityService() {
      }
     }
    }
-   override fun onFailure(errorCode:Int) {runOnUiThread {if(!closed)status?.text="Screenshot non disponibile ($errorCode)"}}
+   override fun onFailure(errorCode:Int) {Handler(Looper.getMainLooper()).post {if(!closed)status?.text="Screenshot non disponibile ($errorCode)"}}
   })
  }
  private fun closeOverlay() {

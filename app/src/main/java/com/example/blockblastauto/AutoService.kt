@@ -149,10 +149,12 @@ class AutoService : AccessibilityService() {
     handler.post {
      if (!running || closed) return@post
      steps++
-     // Re-read after each move: game animations, clears and piece replacement
-     // may change the board; never execute stale coordinates.
-     pending = emptyList()
-     handler.postDelayed({ analyze() }, 1050)
+     pending = pending.drop(1)
+     if (pending.isNotEmpty()) {
+      handler.postDelayed({ executeNext() }, 900)
+     } else {
+      handler.postDelayed({ analyze() }, 1300)
+     }
     }
    }
    override fun onCancelled(gestureDescription: GestureDescription?) {
